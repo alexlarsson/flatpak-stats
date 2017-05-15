@@ -37,13 +37,13 @@ class FlatpakStats:
     def get_log_requests(self, f):
         log_line = f.read()
         pat = (r''
-               '(\d+.\d+.\d+.\d+)\s-\s-\s' #IP address
+               '(\d+.\d+.\d+.\d+)\s-\s-\s' #source
                '\[(.+)\]\s' #datetime
-               '"GET\s(.+)\s\w+/.+"\s' #requested file
+               '"GET\s(.+)\s\w+/.+"\s' #path
                '(\d+)\s' #status
-               '(\d+)\s' #bandwidth
-               '"(.+)"\s' #referrer
-               '"(.+)"' #user agent
+               '(\d+)\s' #size
+               '"([^"]+)"\s' #referrer
+               '"([^"]+)"' #user agent
         )
         return re.findall(pat, log_line)
 
