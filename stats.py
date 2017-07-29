@@ -38,8 +38,9 @@ class FlatpakStats:
     def lookupCommit(self,commit):
         if commit in self.commits:
             return self.commits[commit]
-        res = self.repo.load_commit(commit)
-        if not res[0]:
+        try:
+            res = self.repo.load_commit(commit)
+        except:
             return None
         metadata = res[1][0]
         if not "xa.ref" in metadata:
