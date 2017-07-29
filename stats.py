@@ -11,6 +11,7 @@ class FlatpakStats:
         self.commits = {}
         self.roots = {}
         self.refs = {}
+        self.lines = []
         self.repo = OSTree.Repo.new(Gio.File.new_for_path("mirror"))
         self.repo.open(None)
 
@@ -34,6 +35,19 @@ class FlatpakStats:
         except:
             pass
 
+    def lookupCommit(self,commit):
+        if commit in self.commits:
+            return self.commits[commit]
+        res = self.repo.load_commit(commit)
+        if not res[0]:
+            return None
+        metadata = res[1][0]
+        if not "xa.ref" in metadata:
+            return None
+        ref = metadata["xa.ref"]
+        self.commits[commit] = ref;
+        return ref;
+
     def get_log_requests(self, f):
         log_line = f.read()
         pat = (r''
@@ -49,6 +63,9 @@ class FlatpakStats:
 
     def parse_log_line(self, line):
         file = line[2]
+        if line[3] != "200":
+            return None
+
         if not file.startswith("/repo/") or file.startswith("/repo/summary") or file.startswith("/repo/config"):
             return None
 
@@ -61,10 +78,9 @@ class FlatpakStats:
                 source = None
                 target = delta
             commit = OSTree.checksum_from_bytes(OSTree.checksum_b64_to_bytes(target))
-            if not commit in self.commits:
-                print("Warning, commit " + commit + " from delta with unknown ref - ignoring", file=sys.stderr)
+            ref = self.lookupCommit(commit)
+            if ref == None:
                 return None
-            ref = self.commits[commit]
         elif file.startswith("/repo/objects/") and file.endswith(".dirtree"):
             dirtree = file[len("/repo/objects/"):-len(".dirtree")].replace("/", "")
             source = None
@@ -83,7 +99,8 @@ class FlatpakStats:
         for req in requests:
             t = self.parse_log_line (req)
             if t:
+                self.lines.append(t)
                 ref = t[0]
                 if not ref in self.refs:
                     self.refs[ref] = []
-                self.refs[ref].append(t);
+                self.refs[ref].append(t)
