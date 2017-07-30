@@ -12,7 +12,12 @@ all = []
 for ref in s.refs:
     if ref.find(".Locale/") != -1 or ref.startswith("appstream/"):
         continue
-    all.append( (len(s.refs[ref]), ref) )
+    accesses = s.refs[ref];
+    unique = {}
+    for a in accesses:
+        ip = a[3][0]
+        unique[ip] = True
+    all.append( (len(accesses), len(unique), ref) )
 
-for count, ref in sorted(all, reverse=True):
-    print("{}\t{}".format (count, ref))
+for count, unique, ref in sorted(all, reverse=True):
+    print("{}\t{}\t{}".format (count, unique, ref))
