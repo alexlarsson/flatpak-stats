@@ -2,7 +2,9 @@
 
 REPO=https://flathub.org/repo/
 
-wget https://flathub.org/repo/flathub.gpg
+if ! test -f flathub.gpg; then
+    wget https://flathub.org/repo/flathub.gpg
+fi
 ostree --repo=mirror init
 ostree --repo=mirror remote add --gpg-import=flathub.gpg origin $REPO || true
 ostree --repo=mirror pull --mirror --commit-metadata-only --depth=-1 origin
