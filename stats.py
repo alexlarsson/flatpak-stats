@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import gzip
 import re, sys, gi
 gi.require_version('OSTree', '1.0')
 from gi.repository import GLib, Gio, OSTree
@@ -50,7 +51,7 @@ class FlatpakStats:
         return ref;
 
     def get_log_requests(self, f):
-        log_line = f.read()
+        log_line = f.read().decode("utf-8")
         pat = (r''
                '(\d+.\d+.\d+.\d+)\s-\s-\s' #source
                '\[(.+)\]\s' #datetime
@@ -95,7 +96,10 @@ class FlatpakStats:
         return (ref, commit, source, line)
 
     def parse_log(self, logname):
-        log_file = open(logname, 'r')
+        if logname.endswith(".gz"):
+            log_file = gzip.open(logname, 'rb')
+        else:
+            log_file = open(logname, 'r')
         requests = self.get_log_requests(log_file)
         for req in requests:
             t = self.parse_log_line (req)
