@@ -2,19 +2,21 @@
 
 import stats
 import sys
+import pickle
 
-s = stats.FlatpakStats()
+if len(sys.argv) > 2:
+    filename = sys.argv[2]
+else:
+    filename = "refs.db"
 
-for logname in sys.argv[2:]:
-    s.parse_log(logname)
+refs_db = open(filename, "rb")
+refs = pickle.load(refs_db)
 
 all=[]
-for ref in s.refs:
+for ref in refs:
     parts = ref.split("/")
-    print (parts[1])
-    print (sys.argv[1])
     if parts[1] == sys.argv[1]:
-        all = all + s.refs[ref]
+        all = all + refs[ref]
 
 for i in all:
     req = i[3]

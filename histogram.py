@@ -2,17 +2,20 @@
 
 import stats
 import sys
+import pickle
 
-s = stats.FlatpakStats()
-
-for logname in sys.argv[1:]:
-    s.parse_log(logname)
+if len(sys.argv) > 1:
+    filename = sys.argv[1]
+else:
+    filename = "refs.db"
+refs_db = open(filename, "rb")
+refs = pickle.load(refs_db)
 
 all = []
-for ref in s.refs:
+for ref in refs:
     if ref.find(".Locale/") != -1 or ref.startswith("appstream/"):
         continue
-    accesses = s.refs[ref];
+    accesses = refs[ref];
     unique = {}
     for a in accesses:
         ip = a[3][0]
