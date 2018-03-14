@@ -54,12 +54,15 @@ def parse_log(logname):
             else:
                 commit = deltaid_to_commit(target)
                 url = "https://flathub.org/repo/objects/%s/%s.commit" % (commit[0:2], commit[2:])
-                response = urllib2.urlopen(url)
-                commitv = response.read()
-                if commitv:
-                    v = GLib.Variant.new_from_bytes(GLib.VariantType.new("(a{sv}aya(say)sstayay)"), GLib.Bytes.new(commitv), False)
-                    if "xa.ref" in v[0]:
-                        ref = v[0]["xa.ref"]
+                try:
+                    response = urllib2.urlopen(url)
+                    commitv = response.read()
+                    if commitv:
+                        v = GLib.Variant.new_from_bytes(GLib.VariantType.new("(a{sv}aya(say)sstayay)"), GLib.Bytes.new(commitv), False)
+                        if "xa.ref" in v[0]:
+                            ref = v[0]["xa.ref"]
+                except:
+                    pass
                 refs_cache[target] = ref
             if ref:
                 print('%s\t%s\t%s\t%s' % (l.group(1), l.group(2), ref, l.group(8)))
